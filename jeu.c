@@ -1,6 +1,6 @@
 #include "jeu.h"
 
-void init(Jeu* j){
+void initPlateau(Jeu* j){
     for (int i=0; i<CASES; i++){
         j->plateau[i] = 4;
     }
@@ -64,34 +64,41 @@ bool jouerCoup(Jeu* j, int joueur, int indexCase){
     return true;
 }
 
-void afficherPlateau(Jeu* j) {
-    printf("\n============================================\n\n");
+void afficherPlateau(Jeu* j, char* buffer, size_t bufsize) {
+    char tmp[256];
+    buffer[0] = '\0';  // initialisation
 
-    printf("Joueur 2 →\n");
-    printf("   Cases : ");
+    strncat(buffer, "\n============================================\n\n", bufsize - strlen(buffer) - 1);
+    strncat(buffer, "Joueur 2 →\n", bufsize - strlen(buffer) - 1);
+    strncat(buffer, "   Cases : ", bufsize - strlen(buffer) - 1);
+
     for (int i = 11; i >= 6; i--) {
-        printf(" %2d  ", i);
+        snprintf(tmp, sizeof(tmp), " %2d  ", i);
+        strncat(buffer, tmp, bufsize - strlen(buffer) - 1);
     }
-    printf("\n          ");
+
+    strncat(buffer, "\n          ", bufsize - strlen(buffer) - 1);
     for (int i = 11; i >= 6; i--) {
-        printf(" [%2d] ", j->plateau[i]);
+        snprintf(tmp, sizeof(tmp), " [%2d] ", j->plateau[i]);
+        strncat(buffer, tmp, bufsize - strlen(buffer) - 1);
     }
-    printf("\n");
-
-    printf("   ");
+    strncat(buffer, "\n   ", bufsize - strlen(buffer) - 1);
     for (int i = 0; i <= 5; i++) {
-        printf(" [%2d] ", j->plateau[i]);
+        snprintf(tmp, sizeof(tmp), " [%2d] ", j->plateau[i]);
+        strncat(buffer, tmp, bufsize - strlen(buffer) - 1);
     }
-    printf("\n   Cases : ");
+    strncat(buffer, "\n   Cases : ", bufsize - strlen(buffer) - 1);
     for (int i = 0; i <= 5; i++) {
-        printf(" %2d  ", i);
+        snprintf(tmp, sizeof(tmp), " %2d  ", i);
+        strncat(buffer, tmp, bufsize - strlen(buffer) - 1);
     }
-    printf("\nJoueur 1 →\n");
+    strncat(buffer, "\nJoueur 1 →\n", bufsize - strlen(buffer) - 1);
 
-    printf("\nScores : J1 = %d | J2 = %d\n", j->score[0], j->score[1]);
-    printf("Tour du joueur : %d\n", j->joueur + 1);
-    printf("=============================================\n\n");
+    snprintf(tmp, sizeof(tmp), "\nScores : J1 = %d | J2 = %d\nTour du joueur : %d\n=============================================\n\n",
+             j->score[0], j->score[1], j->joueur + 1);
+    strncat(buffer, tmp, bufsize - strlen(buffer) - 1);
 }
+
 
 bool verifierFin(Jeu* j){
     // Fin : un joueur a 25 graines ou plus
