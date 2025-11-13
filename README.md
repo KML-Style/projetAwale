@@ -50,7 +50,7 @@ Pour lancer un client une fois le serveur démarré,
 
 - OBSERVE <id> : observer une partie
 
-- OBSERVEOUT : lorsque vous observez une partie, pour en sortir
+- OUT_OBSERVER : lorsque vous observez une partie, pour en sortir
 
 - CHALLENGE <user> : défier un joueur
 
