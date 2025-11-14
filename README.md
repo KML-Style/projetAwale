@@ -19,7 +19,7 @@ Pour lancer le serveur,
 
 Pour lancer un client une fois le serveur démarré,
 ```bash
-./bin/client 127.0.0.1 4444
+./bin/client 127.0.0.1 8080
 ```
 
 ## Fonctionnalitées

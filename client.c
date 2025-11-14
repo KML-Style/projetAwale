@@ -62,22 +62,26 @@ static void afficherPlateauClient(int plateau[], int score0, int score1,
 }
 
 static void afficherCommandes(int loggedIn) {
-    printf("Commandes disponibles :\n");
+    printf("Profitez de tous les plaisirs du jeu d'Awale en utilisant les commandes ci dessous:\n");
     if (!loggedIn) {
-        printf("  (Suivez les invites de connexion du serveur)\n\n");
         return;
     }
-    printf("  LIST                         → voir les joueurs connectés disponibles\n");
-    printf("  GAMES / LIST_GAMES           → voir les parties en cours\n");
+    printf("Fonctionnalitées de jeu :\n");
+    printf("  LIST                         → voir les joueurs connectés disponibles pour jouer\n");
+    printf("  GAMES                        → voir les parties en cours\n");
     printf("  OBSERVE <id>                 → observer une partie\n");
     printf("  CHALLENGE <user>             → défier un joueur\n");
+    printf("Fonctionnalitées de discussion :\n");
     printf("  MESSAGE <user> <message>     → message privé\n");
     printf("  SAY <message>                → discuter globalement\n");
+    printf("Fonctionnalitées de profils :\n");
     printf("  BIO <texte 10 lignes max>    → définir/mettre à jour votre bio\n");
     printf("  SHOWBIO <user>               → afficher la bio d’un joueur\n");
+    printf("Fonctionnalitées de confidentialité :\n");
     printf("  FRIEND <user>                → ajouter un ami\n");
     printf("  UNFRIEND <user>              → retirer un ami\n");
     printf("  PRIVATE ON|OFF               → activer/désactiver le mode privé\n");
+    printf("Fonctionnalitées de jeu :\n");
     printf("  QUIT                         → quitter\n\n");
 }
 
@@ -216,7 +220,7 @@ int main(int argc, char *argv[]) {
                       printf("Observation de la partie %d : %s vs %s\n", id, joueur0, joueur1);
                   }
               }
-              else if (strncmp(line, "Vous avez arrêter d'observer cette partie.", strlen("Vous avez arrêter d'observer cette partie.")) == 0) {
+              else if (strncmp(line, "Vous avez arrêté d'observer cette partie", strlen("Vous avez arrêté d'observer cette partie")) == 0) {
                   isObserver = 0; joueur0[0] = joueur1[0] = '\0';
                   printf("%s\n", line);
                   afficherCommandes(loggedIn);
