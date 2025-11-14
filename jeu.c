@@ -1,13 +1,12 @@
 #include "jeu.h"
 
-// Initialise le plateau avec 4 graines par case
+// Fonctions d'initialisation du plateau et des scores
 void initialiserJeu(int plateau[]) {
     for (int i = 0; i < 12; i++) {
         plateau[i] = 4;
     }
 }
 
-// Remet les scores à zéro
 void reinitialiserScores(Joueur *joueur0, Joueur *joueur1) {
     joueur0->score = 0;
     joueur1->score = 0;
@@ -20,34 +19,32 @@ int detecterFamine(int plateau[]) {
     for (int i = 0; i <= 5; i++) grainesJ0 += plateau[i];
     for (int i = 6; i <= 11; i++) grainesJ1 += plateau[i];
 
-    if (grainesJ0 == 0 && grainesJ1 == 0) return -1;  // plateau vide
+    if (grainesJ0 == 0 && grainesJ1 == 0) return -1;  // on enlève le cas du plateau vide
     if (grainesJ0 == 0) return 0;
     if (grainesJ1 == 0) return 1;
 
     return -1;
 }
 
-// Vérifie si la partie doit se terminer
+// Vérifie si la partie doit se terminer (1 si la partie est finie, 0 sinon)
 int terminerPartie(int plateau[], int *score0, int *score1) {
-    // Un joueur atteint ou dépasse 25 points
+    // Un joueur a >= 25 points
     if (*score0 > 24 || *score1 > 24)
         return 1;
 
-    // 48 graines ont été capturées
+    // >= 48 points au total 
     if ((*score0 + *score1) >= 48)
         return 1;
 
-    // Cas de famine
+    // Famine que l'on ne peut pas nourrir
     int grainesJ0 = 0, grainesJ1 = 0;
     for (int i = 0; i <= 5; i++) grainesJ0 += plateau[i];
     for (int i = 6; i <= 11; i++) grainesJ1 += plateau[i];
 
-    int etat = detecterFamine(plateau);
-    if (etat != -1) {
+    if (detecterFamine(plateau) != -1) {
         int joueurVide = (grainesJ0 == 0) ? 0 : 1;
         int joueurAdverse = (joueurVide == 0) ? 1 : 0;
 
-        // Vérifie si l’adversaire peut nourrir
         int peutNourrir = 0;
         if (joueurAdverse == 0) {
             for (int i = 0; i <= 5; i++) {
@@ -65,7 +62,6 @@ int terminerPartie(int plateau[], int *score0, int *score1) {
             }
         }
 
-        // Aucun coup possible pour nourrir → fin de partie
         if (!peutNourrir) {
             int grainesRestantes = grainesJ0 + grainesJ1;
 
@@ -78,34 +74,22 @@ int terminerPartie(int plateau[], int *score0, int *score1) {
             return 1;
         }
     }
-
-    // Fin par indétermination (trop peu de graines restantes)
-    int totalGraines = 0;
-    for (int i = 0; i < 12; i++) totalGraines += plateau[i];
-
-    if (totalGraines <= 3) {
-        for (int i = 0; i <= 5; i++) *score0 += plateau[i];
-        for (int i = 6; i <= 11; i++) *score1 += plateau[i];
-        for (int i = 0; i < 12; i++) plateau[i] = 0;
-        return 1;
-    }
-
-    return 0; // partie continue
+    return 0;
 }
 
-// Capture des graines selon la dernière case jouée
+// Capture des graines 
 void captureGraines(int plateau[], int numero, Joueur *joueur0, Joueur *joueur1, int derniereCase) {
-    int increment = (numero == 0) ? -1 : 1;
-    int i = derniereCase, captures = 0, nbCaptures = 0;
+    int sens = (numero == 0) ? -1 : 1;
+    int i = derniereCase;
+    int captures = 0;
+    int nbCaptures = 0;
     int indicesCaptures[12];
 
-    // Identifie les cases capturables (2 ou 3 graines dans le camp adverse)
-    while (i >= 0 && i <= 11 &&
-           ((numero == 0 && i >= 6) || (numero == 1 && i <= 5)) &&
-           (plateau[i] == 2 || plateau[i] == 3)) {
+    // Cases capturables
+    while (i >= 0 && i <= 11 &&((numero == 0 && i >= 6) || (numero == 1 && i <= 5)) && (plateau[i] == 2 || plateau[i] == 3)) {
         captures += plateau[i];
         indicesCaptures[nbCaptures++] = i;
-        i += increment;
+        i += sens;
     }
 
     // Vérifie qu’il reste des graines dans le camp adverse après capture
@@ -127,8 +111,9 @@ void captureGraines(int plateau[], int numero, Joueur *joueur0, Joueur *joueur1,
     }
 }
 
-// Joue un coup simple pour le joueur donné
+// Le joueur joue un coup 
 int jouerCoup(int plateau[], int numero, Joueur *joueur0, Joueur *joueur1, int indice) {
+    // 1-5 : coups illégaux
     if (numero != 0 && numero != 1) return 1;
     if (indice < 0 || indice > 11) return 2;
     if (numero == 0 && indice > 5) return 3;
@@ -137,14 +122,12 @@ int jouerCoup(int plateau[], int numero, Joueur *joueur0, Joueur *joueur1, int i
 
     int graines = plateau[indice];
 
-    // Si l’adversaire est en famine, le coup doit le nourrir
-    int etatFamine = detecterFamine(plateau);
-    if (etatFamine != -1) {
-        if (numero == 0 && graines <= (5 - indice)) return 6;
-        if (numero == 1 && graines <= (11 - indice)) return 6;
+    // 6 : on ne nourrit pas l'adversaire qui est en famine
+    if (detecterFamine(plateau)!= -1) {
+        if ((numero == 0 && graines <= (5 - indice)) || (numero == 1 && graines <= (11 - indice))) return 6;
     }
 
-    // Distribution des graines (règle des 12)
+    // Distribution des graines 
     plateau[indice] = 0;
     int pos = indice;
     while (graines > 0) {
@@ -156,6 +139,8 @@ int jouerCoup(int plateau[], int numero, Joueur *joueur0, Joueur *joueur1, int i
 
     // Capture éventuelle
     captureGraines(plateau, numero, joueur0, joueur1, pos);
+
+    // 0 : le coup a été joué
     return 0;
 }
 
