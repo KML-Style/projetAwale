@@ -188,8 +188,8 @@ void handleClientMessage(int fd) {
           for (int z = 0; z < games[g].observerCount; z++) {
               if (games[g].observers[z] == fd) {
                   games[g].observers[z] = games[g].observers[--games[g].observerCount];
-                  send(fd, "Vous avez arrêter d'observer cette partie soporiphique et vous voilà à nouveau dans le menu principal !\n",
-                       strlen("Vous avez arrêter d'observer cette partie soporiphique et vous voilà à nouveau dans le menu principal !\n"), 0);
+                  send(fd, "Vous avez arrêté d'observer cette partie soporiphique et vous voilà à nouveau dans le menu principal !\n",
+                       strlen("Vous avez arrêté d'observer cette partie soporiphique et vous voilà à nouveau dans le menu principal !\n"), 0);
                   return;
               }
           }
