@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
                       printf("Observation de la partie %d : %s vs %s\n", id, joueur0, joueur1);
                   }
               }
-              else if (strncmp(line, "Vous avez arrêter d'observer cette partie.", strlen("Vous avez arrêter d'observer cette partie.")) == 0) {
+              else if (strncmp(line, "Vous avez arrêté d'observer cette partie", strlen("Vous avez arrêté d'observer cette partie")) == 0) {
                   isObserver = 0; joueur0[0] = joueur1[0] = '\0';
                   printf("%s\n", line);
                   afficherCommandes(loggedIn);
