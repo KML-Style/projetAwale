@@ -16,6 +16,7 @@ typedef struct {
     char password[32];
     char bio[512];
     char friends[256];
+    int isLogged;
 } Account;
 
 typedef struct {
@@ -45,6 +46,7 @@ extern Client  clients[MAX_CLIENTS];
 extern Game    games[MAX_GAMES];
 extern Account accounts[MAX_ACCOUNTS];
 extern int     accountCount;
+extern int     clientsCount;
 
 extern fd_set master_set;
 extern int max_fd;

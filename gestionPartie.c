@@ -132,3 +132,15 @@ void cancelClientGame(int ci) {
     clients[ci].inGame = 0; clients[ci].opponent = -1; clients[ci].ready = 0;
 }
 
+int findGameByPlayer(char *player)
+{
+    for(int i=0;i<MAX_GAMES;i++)
+    {
+        if(games[i].active && (strcmp(games[i].j0.pseudo,player)==0 || strcmp(games[i].j1.pseudo,player)==0))
+        {
+            return i;
+        }
+
+    }
+    return -1;
+}

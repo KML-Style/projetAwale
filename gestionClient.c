@@ -1,6 +1,7 @@
 #include "gestionClient.h"
 #include "gestionPartie.h"
 #include "compte.h"
+#include "var.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -57,15 +58,16 @@ void handleNewConnection(int server_fd) {
     int newfd = accept(server_fd, (struct sockaddr*)&cli, &alen);
     if (newfd < 0) return;
 
-    for (int i = 0; i < MAX_CLIENTS; i++) if (clients[i].fd == -1) {
-        clients[i].fd = newfd;
-        clients[i].loggedIn = 0;
-        clients[i].loginStage = 0;
-        clients[i].inGame = 0;
-        clients[i].ready = 0;
-        clients[i].opponent = -1;
-        clients[i].privateMode = 0;
-        clients[i].name[0] = '\0';
+    if (clients[clientsCount].fd == -1) {
+        clients[clientsCount].fd = newfd;
+        clients[clientsCount].loggedIn = 0;
+        clients[clientsCount].loginStage = 0;
+        clients[clientsCount].inGame = 0;
+        clients[clientsCount].ready = 0;
+        clients[clientsCount].opponent = -1;
+        clients[clientsCount].privateMode = 0;
+        clients[clientsCount].name[0] = '\0';
+        clientsCount++;
         FD_SET(newfd, &master_set);
         if (newfd > max_fd) max_fd = newfd;
         send(newfd, "Entrez votre pseudo :\n", strlen("Entrez votre pseudo :\n"), 0);
@@ -97,16 +99,31 @@ void handleClientMessage(int fd) {
           memcpy(clients[i].name, buf, uname_len);
           clients[i].name[uname_len] = '\0';
           int idx = findAccount(clients[i].name);
-          if (idx >= 0) {
+          if (idx >= 0)
+          {
+            if(accounts[idx].isLogged!=1) {
               char msg[80];
               snprintf(msg, sizeof(msg), "Ravi de vous revoir, %s!\nEntrez votre mot de passe:\n", clients[i].name);
               send(fd, msg, strlen(msg), 0);
-          } else {
+              accounts[idx].isLogged=1;
+            clients[i].loginStage = 1;
+          } 
+          else
+          {
+            char msg[80];
+            snprintf(msg, sizeof(msg), "%s est déjà connecté\nEntrez votre pseudo :\n", clients[i].name);
+            send(fd, msg, strlen(msg), 0);
+            return;
+          }
+        }
+          else {
               char msg[80];
               snprintf(msg, sizeof(msg), "Bienvenue, %s! Veuillez créer un mot de passe:\n", clients[i].name);
               send(fd, msg, strlen(msg), 0);
-          }
+              accounts[idx].isLogged=1;
           clients[i].loginStage = 1;
+          }
+          
           return;
       } else {
           int idx = findAccount(clients[i].name);
@@ -114,6 +131,7 @@ void handleClientMessage(int fd) {
               if (strcmp(accounts[idx].password, buf) == 0) {
                   clients[i].loggedIn = 1;
                   clients[i].loginStage = 2;
+                  accounts[idx].isLogged=1;
                   send(fd, "Vous êtes connectés avec succès !\n", strlen("Vous êtes connectés avec succès !\n"), 0);
               } else {
                   send(fd, "ERREUR : Le mot de passe est incorrect.\nEntrez votre pseudo :\n",
@@ -133,6 +151,7 @@ void handleClientMessage(int fd) {
                   accounts[accountCount].friends[0] = '\0';
                   accountCount++; saveAccounts();
                   clients[i].loggedIn = 1; clients[i].loginStage = 2;
+                  accounts[accountCount].isLogged=1;
                   send(fd, "Votre nouveau compte à été crée avec succès.\n",
                        strlen("Votre nouveau compte à été crée avec succès.\n"), 0);
               } else {
@@ -299,8 +318,19 @@ void handleClientMessage(int fd) {
         } else send(fd, "ERREUR : Compte non trouvé.\n", strlen("ERREUR : Compte non trouvé.\n"), 0);
     }
     else if (strncmp(buf, "CHALLENGE ", 10) == 0) {
-        char target[16]; if (sscanf(buf+10, "%15s", target) != 1) { send(fd, "ERR Usage: CHALLENGE <user>\n", strlen("ERR Usage: CHALLENGE <user>\n"), 0); return; }
+        char target[16]; if (sscanf(buf+10, "%15s", target) != 1) { 
+            
+            send(fd, "ERR Usage: CHALLENGE <user>\n", strlen("ERR Usage: CHALLENGE <user>\n"), 0); 
+            return;
+         }
         if (strcmp(target, clients[i].name) == 0) { send(fd, "ERREUR : Vous ne pouvez pas vous défier vous-même !\n", strlen("ERREUR : Vous ne pouvez pas vous défier vous-même !\n"), 0); return; }
+        else {
+            int idxG=findGameByPlayer(target);
+            if(idxG!=-1)
+            {
+                send(fd,"ERREUR : Le joueur demandé est déjà dans une partie .\n",strlen("ERREUR : Le joueur demandé est déjà dans une partie .\n"),0); return;
+            }
+        }
         for (int j = 0; j < MAX_CLIENTS; j++)
             if (clients[j].fd != -1 && clients[j].loggedIn && strcmp(clients[j].name, target)==0) {
               char msg[128];
@@ -389,6 +419,8 @@ void handleClientMessage(int fd) {
         broadcast(msg, fd);
     }
     else if (strncmp(buf, "QUIT", 4) == 0) {
+        int idx = findAccount(clients[i].name);
+        accounts[idx].isLogged=0;
         removeClient(fd);
     }
     else {

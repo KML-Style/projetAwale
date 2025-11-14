@@ -10,6 +10,7 @@ void endGame(Game *g);
 void processMove(int ci, int pit);
 int canObserve(Game *g, const char *observer);
 void cancelClientGame(int ci);
+int findGameByPlayer(char *player);
 
 #endif
 
