@@ -1,7 +1,3 @@
-# =====================================================
-# Awalé Game Project - Makefile
-# =====================================================
-
 CC      = gcc
 CFLAGS  = -Wall -Wextra -O2 -std=c11
 LDFLAGS =
@@ -9,7 +5,7 @@ OBJDIR  = obj
 BINDIR  = bin
 
 # Source files
-SRV_SRC = serveur.c jeu.c
+SRV_SRC = serveur.c jeu.c compte.c var.c gestionClient.c gestionPartie.c
 CLI_SRC = client.c
 SRV_OBJ = $(SRV_SRC:%.c=$(OBJDIR)/%.o)
 CLI_OBJ = $(CLI_SRC:%.c=$(OBJDIR)/%.o)
@@ -46,6 +42,7 @@ run-server: $(SERVER)
 	./$(SERVER)
 
 run-client: $(CLIENT)
-	./$(CLIENT) 127.0.0.1 4444
+	./$(CLIENT) 127.0.0.1 8080
 
 .PHONY: all clean run-server run-client
+
